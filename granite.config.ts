@@ -4,14 +4,14 @@ import { hermes } from '@granite-js/plugin-hermes';
 import { defineConfig } from '@granite-js/react-native/config';
 
 export default defineConfig({
-  appName: 'squishy',
+  appName: 'mallangmallang',
   scheme: 'intoss',
   plugins: [
     router(),
     hermes(),
     appsInToss({
       brand: {
-        displayName: '스퀴시',
+        displayName: '말랑말랑',
         primaryColor: '#3182F6',
         icon: '',
       },

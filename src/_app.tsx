@@ -7,6 +7,6 @@ function AppContainer({ children }: PropsWithChildren<InitialProps>) {
 }
 
 export default Granite.registerApp(AppContainer, {
-  appName: 'squishy',
+  appName: 'mallangmallang',
   context,
 });
