@@ -1,4 +1,4 @@
-# Squishy
+# 말랑말랑 (mallangmallang)
 
 말랑이, 왁뿌볼 같은 촉감 장난감을 모티브로 한 스트레스 해소 토이 앱.  
 토스 슈퍼앱 내 미니앱(앱인토스)으로 배포.
@@ -25,6 +25,20 @@
 
 ## 시작하기
 
+미니앱은 로컬 브라우저로 실행되지 않습니다. **앱인토스 [샌드박스 앱](https://developers-apps-in-toss.toss.im/development/test/sandbox)** 을 설치한 뒤 아래 순서로 실행하세요.
+
 ```bash
-# 준비 중
+npm install
+npm run dev   # Metro 개발 서버 (http://0.0.0.0:8081)
+```
+
+샌드박스 앱에서 스킴 `intoss://mallangmallang` 입력 → "스키마 열기".
+
+- iOS 실기기: 맥과 같은 Wi-Fi에 연결, 샌드박스 앱에 맥 IP 입력 (`ipconfig getifaddr en0`)
+- Android 실기기: USB 연결 후 `adb reverse tcp:8081 tcp:8081 && adb reverse tcp:5173 tcp:5173`
+
+빌드 산출물(`.ait`) 생성:
+
+```bash
+npm run build
 ```
