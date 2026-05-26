@@ -21,10 +21,11 @@
 
 ## 개발 문서
 
+- [개발 환경 세팅](./docs/DEV_SETUP.md)
+- [앱인토스 개발 환경 원칙](./docs/APPS_IN_TOSS.md)
 - [브랜치 전략](./docs/BRANCHING.md)
 - [PR 전략](./docs/PULL_REQUEST.md)
 - [이슈 관리 정책](./docs/ISSUE.md)
-- [앱인토스 개발 환경 원칙](./docs/APPS_IN_TOSS.md)
 - 의사결정 과정, 개발 일지, 트러블슈팅은 [Wiki](../../wiki)에서 확인할 수 있습니다.
 
 ## 시작하기
