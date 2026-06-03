@@ -1,5 +1,5 @@
 import { generateHapticFeedback } from '@apps-in-toss/framework';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 type Stage = 'idle' | 'light' | 'medium' | 'heavy';
 
@@ -38,5 +38,5 @@ export function useSquishyHaptic() {
     generateHapticFeedback({ type: 'tickMedium' });
   }, []);
 
-  return { onGrant, onMove, onRestoreEnd };
+  return useMemo(() => ({ onGrant, onMove, onRestoreEnd }), [onGrant, onMove, onRestoreEnd]);
 }

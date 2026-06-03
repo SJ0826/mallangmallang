@@ -21,14 +21,32 @@ const SPRING_CONFIG = {
 } as const;
 
 export function SquishyView({ size, children, style }: Props) {
-  const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const panX = useRef(new Animated.Value(0)).current;
+  const panY = useRef(new Animated.Value(0)).current;
   const scaleX = useRef(new Animated.Value(1)).current;
   const scaleY = useRef(new Animated.Value(1)).current;
   const rotate = useRef(new Animated.Value(0)).current;
-  const haptic = useSquishyHaptic();
 
+  const haptic = useSquishyHaptic();
+  // PanResponder 핸들러를 매 렌더 재생성하지 않도록 ref로 우회
+  const hapticRef = useRef(haptic);
+  hapticRef.current = haptic;
+
+  // panX/panY 변화에 따라 scale·rotate를 추종시킨다.
+  // release 시에는 panX/panY만 spring해도 listener가 자동으로 scale·rotate를 1·0으로 보낸다.
   useEffect(() => {
-    const id = pan.addListener(({ x, y }) => {
+    let lastX = 0;
+    let lastY = 0;
+    const idX = panX.addListener(({ value }) => {
+      lastX = value;
+      updateDerived(lastX, lastY);
+    });
+    const idY = panY.addListener(({ value }) => {
+      lastY = value;
+      updateDerived(lastX, lastY);
+    });
+
+    function updateDerived(x: number, y: number) {
       const distance = Math.sqrt(x * x + y * y);
       const dragDistance = distance / FOLLOW_RATIO;
       scaleX.setValue(1 + dragDistance / SCALE_X_DIVISOR);
@@ -36,11 +54,13 @@ export function SquishyView({ size, children, style }: Props) {
       if (distance > 0.5) {
         rotate.setValue(Math.atan2(y, x));
       }
-    });
+    }
+
     return () => {
-      pan.removeListener(id);
+      panX.removeListener(idX);
+      panY.removeListener(idY);
     };
-  }, [pan, scaleX, scaleY, rotate]);
+  }, [panX, panY, scaleX, scaleY, rotate]);
 
   const responder = useMemo(
     () =>
@@ -52,38 +72,46 @@ export function SquishyView({ size, children, style }: Props) {
         onPanResponderTerminationRequest: () => false,
         onShouldBlockNativeResponder: () => true,
         onPanResponderGrant: () => {
-          pan.stopAnimation();
-          scaleX.stopAnimation();
-          scaleY.stopAnimation();
-          rotate.stopAnimation();
-          pan.setValue({ x: 0, y: 0 });
-          haptic.onGrant();
+          panX.stopAnimation();
+          panY.stopAnimation();
+          panX.setValue(0);
+          panY.setValue(0);
+          hapticRef.current.onGrant();
         },
         onPanResponderMove: (_, g) => {
-          pan.setValue({ x: g.dx * FOLLOW_RATIO, y: g.dy * FOLLOW_RATIO });
+          panX.setValue(g.dx * FOLLOW_RATIO);
+          panY.setValue(g.dy * FOLLOW_RATIO);
           const dragDistance = Math.sqrt(g.dx * g.dx + g.dy * g.dy);
-          haptic.onMove(dragDistance);
+          hapticRef.current.onMove(dragDistance);
         },
         onPanResponderRelease: () => {
           Animated.parallel([
-            Animated.spring(pan, { toValue: { x: 0, y: 0 }, ...SPRING_CONFIG }),
-            Animated.spring(scaleX, { toValue: 1, ...SPRING_CONFIG }),
-            Animated.spring(scaleY, { toValue: 1, ...SPRING_CONFIG }),
-            Animated.spring(rotate, { toValue: 0, ...SPRING_CONFIG }),
+            Animated.spring(panX, { toValue: 0, ...SPRING_CONFIG }),
+            Animated.spring(panY, { toValue: 0, ...SPRING_CONFIG }),
           ]).start(({ finished }) => {
-            if (finished) haptic.onRestoreEnd();
+            if (finished) {
+              // 안전망: listener가 미세 잔차로 정확히 1·0에 못 닿았을 때
+              scaleX.setValue(1);
+              scaleY.setValue(1);
+              rotate.setValue(0);
+              hapticRef.current.onRestoreEnd();
+            }
           });
         },
         onPanResponderTerminate: () => {
           Animated.parallel([
-            Animated.spring(pan, { toValue: { x: 0, y: 0 }, ...SPRING_CONFIG }),
-            Animated.spring(scaleX, { toValue: 1, ...SPRING_CONFIG }),
-            Animated.spring(scaleY, { toValue: 1, ...SPRING_CONFIG }),
-            Animated.spring(rotate, { toValue: 0, ...SPRING_CONFIG }),
-          ]).start();
+            Animated.spring(panX, { toValue: 0, ...SPRING_CONFIG }),
+            Animated.spring(panY, { toValue: 0, ...SPRING_CONFIG }),
+          ]).start(({ finished }) => {
+            if (finished) {
+              scaleX.setValue(1);
+              scaleY.setValue(1);
+              rotate.setValue(0);
+            }
+          });
         },
       }),
-    [pan, scaleX, scaleY, rotate, haptic],
+    [panX, panY, scaleX, scaleY, rotate],
   );
 
   const rotateDeg = rotate.interpolate({
@@ -104,8 +132,8 @@ export function SquishyView({ size, children, style }: Props) {
           alignItems: 'center',
           justifyContent: 'center',
           transform: [
-            { translateX: pan.x },
-            { translateY: pan.y },
+            { translateX: panX },
+            { translateY: panY },
             { rotate: rotateDeg },
             { scaleX },
             { scaleY },
