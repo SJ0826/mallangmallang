@@ -46,7 +46,11 @@ export function SquishyView({ size, children, style }: Props) {
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponderCapture: () => true,
         onMoveShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponderCapture: () => true,
+        onPanResponderTerminationRequest: () => false,
+        onShouldBlockNativeResponder: () => true,
         onPanResponderGrant: () => {
           pan.stopAnimation();
           scaleX.stopAnimation();
@@ -93,6 +97,7 @@ export function SquishyView({ size, children, style }: Props) {
       {...responder.panHandlers}
     >
       <Animated.View
+        pointerEvents="none"
         style={{
           width: size,
           height: size,
