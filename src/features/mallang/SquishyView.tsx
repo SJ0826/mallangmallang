@@ -1,16 +1,11 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import {
-  Animated,
-  PanResponder,
-  StyleSheet,
-  View,
-  type ImageSourcePropType,
-} from 'react-native';
+import { Animated, PanResponder, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSquishyHaptic } from './useSquishyHaptic';
 
 interface Props {
-  source: ImageSourcePropType;
-  size?: number;
+  size: number;
+  children: React.ReactNode;
+  style?: ViewStyle;
 }
 
 const FOLLOW_RATIO = 0.6;
@@ -25,7 +20,7 @@ const SPRING_CONFIG = {
   useNativeDriver: false,
 } as const;
 
-export function SquishyView({ source, size = 240 }: Props) {
+export function SquishyView({ size, children, style }: Props) {
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const scaleX = useRef(new Animated.Value(1)).current;
   const scaleY = useRef(new Animated.Value(1)).current;
@@ -35,7 +30,6 @@ export function SquishyView({ source, size = 240 }: Props) {
   useEffect(() => {
     const id = pan.addListener(({ x, y }) => {
       const distance = Math.sqrt(x * x + y * y);
-      // FOLLOW_RATIO를 되돌려 실제 손가락 변위 기준으로 변형
       const dragDistance = distance / FOLLOW_RATIO;
       scaleX.setValue(1 + dragDistance / SCALE_X_DIVISOR);
       scaleY.setValue(Math.max(SCALE_Y_FLOOR, 1 - dragDistance / SCALE_Y_DIVISOR));
@@ -95,15 +89,15 @@ export function SquishyView({ source, size = 240 }: Props) {
 
   return (
     <View
-      style={[styles.area, { width: size, height: size }]}
+      style={[styles.area, { width: size, height: size }, style]}
       {...responder.panHandlers}
     >
-      <Animated.Image
-        source={source}
-        resizeMode="contain"
+      <Animated.View
         style={{
           width: size,
           height: size,
+          alignItems: 'center',
+          justifyContent: 'center',
           transform: [
             { translateX: pan.x },
             { translateY: pan.y },
@@ -112,7 +106,9 @@ export function SquishyView({ source, size = 240 }: Props) {
             { scaleY },
           ],
         }}
-      />
+      >
+        {children}
+      </Animated.View>
     </View>
   );
 }

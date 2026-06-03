@@ -1,6 +1,7 @@
 import { Txt } from '@toss/tds-react-native';
 import React from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { MallangCharacter } from './MallangCharacter';
 import type { Mallang } from './data';
 import { isUnlocked, remainingToUnlock } from './data';
 
@@ -22,12 +23,8 @@ export function MallangCard({ mallang, totalCount, onPress }: Props) {
       accessibilityLabel={unlocked ? mallang.name : `${mallang.name} 잠금. ${remaining}회 더 터뜨리면 해제`}
       accessibilityState={{ disabled: !unlocked }}
     >
-      <View style={styles.imageWrap}>
-        <Image
-          source={mallang.asset}
-          style={[styles.image, !unlocked && styles.imageLocked]}
-          resizeMode="contain"
-        />
+      <View style={styles.characterWrap}>
+        <MallangCharacter id={mallang.id} size={120} locked={!unlocked} />
       </View>
       <View style={styles.labelWrap}>
         {unlocked ? (
@@ -62,19 +59,11 @@ const styles = StyleSheet.create({
   cardPressed: {
     opacity: 0.7,
   },
-  imageWrap: {
+  characterWrap: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  imageLocked: {
-    opacity: 0.18,
-    tintColor: '#1A202C',
   },
   labelWrap: {
     marginTop: 8,

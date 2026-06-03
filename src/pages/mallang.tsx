@@ -2,6 +2,7 @@ import { createRoute } from '@granite-js/react-native';
 import { Txt } from '@toss/tds-react-native';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { MallangCharacter } from '../features/mallang/MallangCharacter';
 import { SquishyView } from '../features/mallang/SquishyView';
 import { MALLANGS } from '../features/mallang/data';
 import type { MallangId } from '../features/mallang/data';
@@ -45,7 +46,9 @@ function Page() {
       </View>
 
       <View style={styles.stage}>
-        <SquishyView source={mallang.asset} size={240} />
+        <SquishyView size={240}>
+          <MallangCharacter id={mallang.id} size={240} />
+        </SquishyView>
       </View>
 
       <View style={styles.caption}>
