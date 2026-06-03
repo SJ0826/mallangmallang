@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Storage } from '@apps-in-toss/framework';
 import { useCallback, useEffect, useState } from 'react';
 import type { MallangId } from './data';
 
@@ -7,7 +7,7 @@ export const SQUISH_COUNTS_KEY = '@mallangmallang/squish-counts';
 export type SquishCounts = Partial<Record<MallangId, number>>;
 
 async function readSquishCounts(): Promise<SquishCounts> {
-  const raw = await AsyncStorage.getItem(SQUISH_COUNTS_KEY);
+  const raw = await Storage.getItem(SQUISH_COUNTS_KEY);
   if (raw == null) return {};
   try {
     const parsed = JSON.parse(raw);

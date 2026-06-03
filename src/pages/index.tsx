@@ -24,7 +24,11 @@ function Page() {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
       <Top
-        title="말랑이"
+        title={
+          <Txt typography="t7" fontWeight="bold">
+            말랑이
+          </Txt>
+        }
         subtitle1={
           <Txt typography="t3" color="#4A5568">
             꾸준히 만지면 모여요
