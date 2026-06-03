@@ -31,21 +31,19 @@ PoC 페이지 진입 경로:
 - 복원 완료: `tickMedium`
 - 특수 모드(왁뿌볼 등): `wiggle` / `confetti`
 
-## Reanimated
+## Reanimated → ❌ 사용 불가 (RN Animated로 확정)
 
-- **사용 라이브러리**: `react-native-reanimated@^4.4.0` + `react-native-worklets@^0.9.1`
-- **Babel 설정**: `babel.config.js`에 `react-native-worklets/plugin` 추가
-  ```js
-  module.exports = {
-    presets: ['babel-preset-granite'],
-    plugins: ['react-native-worklets/plugin'],
-  };
-  ```
-- **번들링**: ✅ Granite Metro 번들러가 worklet 변환을 정상 처리. 11.8MB iOS 번들 빌드 성공, reanimated/worklets 심볼 1411개 포함됨
-- **런타임 동작**: ⚠️ 실기기 검증 필요. Reanimated 4.x는 **New Architecture only**이며, Granite 컨테이너가 reanimated 네이티브 모듈을 사전 포함하지 않으면 첫 호출 시 크래시할 가능성이 있다. `@granite-js/native/dist`에는 `react-native-gesture-handler`는 있으나 `react-native-reanimated`는 없음 — 토스 측 컨테이너에서 사전 빌드 포함 여부 확인 필요
-- **PoC 동작**: `/poc-reanimated`에서 원을 누르면 `withSpring`으로 1.4배 확대, 떼면 1.0으로 복원 (`useSharedValue` + `useAnimatedStyle`)
+**검증 결과 (2026-06-03 실기기)**:
+- 샌드박스 앱 진입 시 `TypeError: Cannot read property 'loadUnpackers' of undefined` (in `react-native-reanimated/src/index.ts`)
+- `@granite-js/native/dist` 화이트리스트에 `react-native-reanimated`/`react-native-worklets`가 없음 → 워클릿 네이티브 모듈이 사전 포함되지 않아 import 시점에 즉시 크래시
+- 페이지 진입뿐 아니라 `require.context` 기반 라우터가 모든 페이지를 훑는 과정에서 동반 실패 → 앱 전체가 뜨지 않음
 
-**막힐 경우 대안**: RN 내장 `Animated` API + `useNativeDriver: true`. Worklet 없이 JS 스레드에서 처리하므로 게임 수준 60fps 보장은 어렵지만 토이 인터랙션 수준은 충분.
+**결정**: `react-native-reanimated` + `react-native-worklets` 의존성 **제거**, RN 내장 `Animated` API로 진행.
+- `babel.config.js`의 `react-native-worklets/plugin` 제거
+- `src/pages/poc-reanimated.tsx`를 `Animated.spring` + `useNativeDriver: true`로 재작성 (페이지 라우트명은 `/poc-reanimated` 유지)
+- 토이 인터랙션 수준에서는 충분. 게임 수준 60fps가 필요한 시점에 다시 평가.
+
+**향후 재검토 조건**: Granite 컨테이너가 reanimated/worklets 네이티브 모듈을 사전 포함하는 버전을 릴리스할 경우.
 
 ## 사운드
 
@@ -74,7 +72,7 @@ PoC 페이지 진입 경로:
 ### iOS
 - [ ] 샌드박스 앱에서 `intoss://mallangmallang` 진입
 - [ ] `/poc-haptic` 10개 버튼 진동 차이 체감 후 매핑 노트 갱신
-- [ ] `/poc-reanimated` 원 터치 시 스프링 동작 확인 (크래시 여부 우선)
+- [ ] `/poc-reanimated` (Animated 버전) 원 터치 시 스프링 동작 확인
 - [ ] `/poc-sound` 로드 성공 후 재생 확인 (외부 URL 네트워크 권한 필요)
 
 ### Android

@@ -19,7 +19,7 @@ function Page() {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('/poc-reanimated')}>
-        <Text style={styles.buttonText}>Reanimated PoC</Text>
+        <Text style={styles.buttonText}>Animated PoC</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('/poc-sound')}>
