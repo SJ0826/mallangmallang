@@ -31,33 +31,37 @@ PoC 페이지 진입 경로:
 - 복원 완료: `tickMedium`
 - 특수 모드(왁뿌볼 등): `wiggle` / `confetti`
 
-## Reanimated
+## Reanimated → ❌ 사용 불가 (RN Animated로 확정)
 
-- **사용 라이브러리**: `react-native-reanimated@^4.4.0` + `react-native-worklets@^0.9.1`
-- **Babel 설정**: `babel.config.js`에 `react-native-worklets/plugin` 추가
-  ```js
-  module.exports = {
-    presets: ['babel-preset-granite'],
-    plugins: ['react-native-worklets/plugin'],
-  };
-  ```
-- **번들링**: ✅ Granite Metro 번들러가 worklet 변환을 정상 처리. 11.8MB iOS 번들 빌드 성공, reanimated/worklets 심볼 1411개 포함됨
-- **런타임 동작**: ⚠️ 실기기 검증 필요. Reanimated 4.x는 **New Architecture only**이며, Granite 컨테이너가 reanimated 네이티브 모듈을 사전 포함하지 않으면 첫 호출 시 크래시할 가능성이 있다. `@granite-js/native/dist`에는 `react-native-gesture-handler`는 있으나 `react-native-reanimated`는 없음 — 토스 측 컨테이너에서 사전 빌드 포함 여부 확인 필요
-- **PoC 동작**: `/poc-reanimated`에서 원을 누르면 `withSpring`으로 1.4배 확대, 떼면 1.0으로 복원 (`useSharedValue` + `useAnimatedStyle`)
+**검증 결과 (2026-06-03 실기기)**:
+- 샌드박스 앱 진입 시 `TypeError: Cannot read property 'loadUnpackers' of undefined` (in `react-native-reanimated/src/index.ts`)
+- `@granite-js/native/dist` 화이트리스트에 `react-native-reanimated`/`react-native-worklets`가 없음 → 워클릿 네이티브 모듈이 사전 포함되지 않아 import 시점에 즉시 크래시
+- 페이지 진입뿐 아니라 `require.context` 기반 라우터가 모든 페이지를 훑는 과정에서 동반 실패 → 앱 전체가 뜨지 않음
 
-**막힐 경우 대안**: RN 내장 `Animated` API + `useNativeDriver: true`. Worklet 없이 JS 스레드에서 처리하므로 게임 수준 60fps 보장은 어렵지만 토이 인터랙션 수준은 충분.
+**결정**: `react-native-reanimated` + `react-native-worklets` 의존성 **제거**, RN 내장 `Animated` API로 진행.
+- `babel.config.js`의 `react-native-worklets/plugin` 제거
+- `src/pages/poc-reanimated.tsx`를 `Animated.spring` + `useNativeDriver: true`로 재작성 (페이지 라우트명은 `/poc-reanimated` 유지)
+- 토이 인터랙션 수준에서는 충분. 게임 수준 60fps가 필요한 시점에 다시 평가.
 
-## 사운드
+**향후 재검토 조건**: Granite 컨테이너가 reanimated/worklets 네이티브 모듈을 사전 포함하는 버전을 릴리스할 경우.
 
-- **사용 라이브러리**: `react-native-sound@^0.13.0`
-- **번들링**: ✅ 정상. 번들 사이즈 영향 미미
-- **자산 통합 문제**: react-native-sound는 `require()` 기반 asset bundling을 지원하지 않고, iOS Main Bundle / Android `res/raw` 폴더에 사운드 파일을 직접 넣어야 함. **Granite는 네이티브 빌드 도구(Xcode/Android Studio)를 직접 사용하지 않으므로 로컬 mp3/m4a를 번들에 포함시키는 표준 방법이 없다.** 현재 PoC는 검증을 위해 외부 HTTPS URL로 우회 재생
-- **PoC 동작**: `/poc-sound`에서 외부 URL의 wav 파일 로드 → 재생 버튼으로 1회 재생
-- **런타임 동작**: ⚠️ 실기기 검증 필요. reanimated와 동일 리스크 (네이티브 모듈 사전 포함 여부)
+## 사운드 → ❌ react-native-sound 사용 불가 (대안 평가 필요)
 
-**후속 작업으로 분리할 항목**:
-1. 로컬 효과음 자산 번들링 방식 결정 (앱인토스 문서에 가이드 요청, 또는 CDN 배포)
-2. `expo-audio` / `react-native-track-player` 대안 평가 (require 지원 여부 + Granite 호환 여부)
+**검증 결과 (2026-06-03 실기기)**:
+- 샌드박스 앱 진입 시 `The package 'react-native-sound' doesn't seem to be linked` 에러
+- reanimated와 동일 패턴: `@granite-js/native/dist` 화이트리스트에 없어 네이티브 모듈이 사전 포함되지 않음
+- `poc-sound.tsx` import 시점에 throw → `require.context` 기반 라우터 동반 실패 → 앱 전체가 뜨지 않음
+
+**결정**: `react-native-sound` 의존성 **제거**, `src/pages/poc-sound.tsx` / `pages/poc-sound.tsx` **삭제**.
+
+**추가로 미해결인 자산 번들링 문제**:
+- react-native-sound 자체가 `require()` 기반 asset bundling을 지원하지 않음 (iOS Main Bundle / Android `res/raw` 직접 배치 필요)
+- Granite는 네이티브 빌드 도구를 직접 다루지 않아 로컬 mp3/m4a 번들 통합 표준 방법이 없음
+- 즉, 라이브러리 호환성 + 자산 번들링 둘 다 해결돼야 함
+
+**후속 작업으로 분리할 항목** (별도 이슈):
+1. 대안 라이브러리 평가: `expo-audio` / `react-native-track-player` 등 Granite 화이트리스트 호환 여부 + require 지원 여부
+2. 로컬 효과음 자산 번들링 방식 결정 (앱인토스 문서에 가이드 요청, 또는 CDN 배포로 우회)
 3. ASMR 효과음 라이선스 정리 (Freesound CC0, Pixabay 등)
 
 ## 공통 주의사항
@@ -74,8 +78,8 @@ PoC 페이지 진입 경로:
 ### iOS
 - [ ] 샌드박스 앱에서 `intoss://mallangmallang` 진입
 - [ ] `/poc-haptic` 10개 버튼 진동 차이 체감 후 매핑 노트 갱신
-- [ ] `/poc-reanimated` 원 터치 시 스프링 동작 확인 (크래시 여부 우선)
-- [ ] `/poc-sound` 로드 성공 후 재생 확인 (외부 URL 네트워크 권한 필요)
+- [ ] `/poc-reanimated` (Animated 버전) 원 터치 시 스프링 동작 확인
+- ~~`/poc-sound`~~ (페이지 삭제됨, 후속 이슈에서 대안 라이브러리로 재구현)
 
 ### Android
 - [ ] `adb reverse tcp:8081 tcp:8081 && adb reverse tcp:5173 tcp:5173`

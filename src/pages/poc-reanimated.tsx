@@ -1,7 +1,6 @@
 import { createRoute } from '@granite-js/react-native';
-import React from 'react';
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import React, { useRef } from 'react';
+import { Animated, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export const Route = createRoute('/poc-reanimated', {
   component: Page,
@@ -9,27 +8,36 @@ export const Route = createRoute('/poc-reanimated', {
 
 function Page() {
   const navigation = Route.useNavigation();
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    scale.value = withSpring(1.4, { damping: 8, stiffness: 120 });
+    Animated.spring(scale, {
+      toValue: 1.4,
+      damping: 8,
+      stiffness: 120,
+      mass: 1,
+      useNativeDriver: true,
+    }).start();
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 12, stiffness: 150 });
+    Animated.spring(scale, {
+      toValue: 1,
+      damping: 12,
+      stiffness: 150,
+      mass: 1,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Reanimated PoC</Text>
+      <Text style={styles.title}>Animated PoC</Text>
       <Text style={styles.subtitle}>원을 길게 눌러보세요 (스프링으로 1.4배 확대 → 복원)</Text>
+      <Text style={styles.note}>※ Reanimated 4.x 호환 불가 → RN 내장 Animated 사용</Text>
 
       <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} style={styles.pressArea}>
-        <Animated.View style={[styles.circle, animatedStyle]} />
+        <Animated.View style={[styles.circle, { transform: [{ scale }] }]} />
       </Pressable>
 
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -56,6 +64,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#4A5568',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  note: {
+    fontSize: 12,
+    color: '#A0AEC0',
     textAlign: 'center',
     marginBottom: 32,
   },

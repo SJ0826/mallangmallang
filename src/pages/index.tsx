@@ -1,6 +1,12 @@
 import { createRoute } from '@granite-js/react-native';
+import { Top, Txt } from '@toss/tds-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { MallangCard } from '../features/mallang/MallangCard';
+import { MALLANGS } from '../features/mallang/data';
+import { isUnlocked } from '../features/mallang/data';
+import type { Mallang } from '../features/mallang/data';
+import { useSquishCounts } from '../features/mallang/storage';
 
 export const Route = createRoute('/', {
   component: Page,
@@ -8,67 +14,68 @@ export const Route = createRoute('/', {
 
 function Page() {
   const navigation = Route.useNavigation();
+  const { totalCount, isLoading } = useSquishCounts();
+
+  const handleSelect = (mallang: Mallang) => {
+    if (!isUnlocked(mallang, totalCount)) return;
+    navigation.navigate('/mallang', { id: mallang.id });
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>말랑말랑 PoC</Text>
-      <Text style={styles.subtitle}>Granite 호환성 검증용 페이지</Text>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <Top
+        title={
+          <Txt typography="t7" fontWeight="bold">
+            말랑이
+          </Txt>
+        }
+        subtitle1={
+          <Txt typography="t3" color="#4A5568">
+            꾸준히 만지면 모여요
+          </Txt>
+        }
+      />
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('/poc-haptic')}>
-        <Text style={styles.buttonText}>햅틱 PoC</Text>
-      </TouchableOpacity>
+      <View style={styles.grid}>
+        {MALLANGS.map((mallang) => (
+          <View key={mallang.id} style={styles.cell}>
+            <MallangCard
+              mallang={mallang}
+              totalCount={isLoading ? 0 : totalCount}
+              onPress={handleSelect}
+            />
+          </View>
+        ))}
+      </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('/poc-reanimated')}>
-        <Text style={styles.buttonText}>Reanimated PoC</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('/poc-sound')}>
-        <Text style={styles.buttonText}>사운드 PoC</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => navigation.navigate('/about')}>
-        <Text style={styles.buttonText}>About</Text>
-      </TouchableOpacity>
+      <View style={styles.footer}>
+        <Txt typography="t2" color="#A0AEC0" textAlign="center">
+          누적 {isLoading ? '...' : totalCount}회 터뜨림
+        </Txt>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 24,
+  scroll: {
+    flex: 1,
     backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1A202C',
-    textAlign: 'center',
-    marginBottom: 8,
+  scrollContent: {
+    paddingBottom: 32,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#4A5568',
-    textAlign: 'center',
-    marginBottom: 32,
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    gap: 12,
   },
-  button: {
-    backgroundColor: '#0064FF',
-    paddingVertical: 14,
+  cell: {
+    width: '47.5%',
+  },
+  footer: {
+    marginTop: 24,
     paddingHorizontal: 24,
-    borderRadius: 8,
-    marginVertical: 6,
-    minWidth: 220,
-  },
-  secondaryButton: {
-    backgroundColor: '#718096',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 });

@@ -15,10 +15,7 @@
     "@toss/tds-react-native": "^2.0.3",
     "brick-module": "0.5.1",
     "react": "19.2.3",
-    "react-native": "0.84.0",
-    "react-native-reanimated": "^4.4.0",
-    "react-native-sound": "^0.13.0",
-    "react-native-worklets": "^0.9.1"
+    "react-native": "0.84.0"
   },
   "devDependencies": {
     "@babel/core": "7.28.5",
