@@ -5,7 +5,6 @@ import { Route as _IndexRoute } from '../pages/';
 import { Route as _MallangRoute } from '../pages/mallang';
 import { Route as _PocHapticRoute } from '../pages/poc-haptic';
 import { Route as _PocReanimatedRoute } from '../pages/poc-reanimated';
-import { Route as _PocSoundRoute } from '../pages/poc-sound';
 
 declare module '@granite-js/react-native' {
   interface RegisterScreenInput {
@@ -14,7 +13,6 @@ declare module '@granite-js/react-native' {
     '/mallang': (typeof _MallangRoute)['_inputType'];
     '/poc-haptic': (typeof _PocHapticRoute)['_inputType'];
     '/poc-reanimated': (typeof _PocReanimatedRoute)['_inputType'];
-    '/poc-sound': (typeof _PocSoundRoute)['_inputType'];
   }
 
   interface RegisterScreen {
@@ -23,6 +21,5 @@ declare module '@granite-js/react-native' {
     '/mallang': (typeof _MallangRoute)['_outputType'];
     '/poc-haptic': (typeof _PocHapticRoute)['_outputType'];
     '/poc-reanimated': (typeof _PocReanimatedRoute)['_outputType'];
-    '/poc-sound': (typeof _PocSoundRoute)['_outputType'];
   }
 }
