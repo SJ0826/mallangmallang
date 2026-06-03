@@ -3,23 +3,17 @@
 import { Route as _AboutRoute } from '../pages/about';
 import { Route as _IndexRoute } from '../pages/';
 import { Route as _MallangRoute } from '../pages/mallang';
-import { Route as _PocHapticRoute } from '../pages/poc-haptic';
-import { Route as _PocReanimatedRoute } from '../pages/poc-reanimated';
 
 declare module '@granite-js/react-native' {
   interface RegisterScreenInput {
     '/about': (typeof _AboutRoute)['_inputType'];
     '/': (typeof _IndexRoute)['_inputType'];
     '/mallang': (typeof _MallangRoute)['_inputType'];
-    '/poc-haptic': (typeof _PocHapticRoute)['_inputType'];
-    '/poc-reanimated': (typeof _PocReanimatedRoute)['_inputType'];
   }
 
   interface RegisterScreen {
     '/about': (typeof _AboutRoute)['_outputType'];
     '/': (typeof _IndexRoute)['_outputType'];
     '/mallang': (typeof _MallangRoute)['_outputType'];
-    '/poc-haptic': (typeof _PocHapticRoute)['_outputType'];
-    '/poc-reanimated': (typeof _PocReanimatedRoute)['_outputType'];
   }
 }

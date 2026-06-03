@@ -10,9 +10,9 @@
 - 실기기 동작 검증: **별도 진행 필요** (아래 "실기기 체크리스트" 참고)
 
 PoC 페이지 진입 경로:
-- `/poc-haptic`
-- `/poc-reanimated`
-- `/poc-sound`
+- ~~`/poc-haptic`~~ (#8 상세 화면에 통합 후 삭제)
+- ~~`/poc-reanimated`~~ (#8 상세 화면에 통합 후 삭제)
+- ~~`/poc-sound`~~ (사용 불가 판정, 페이지 삭제)
 
 ---
 
@@ -77,8 +77,8 @@ PoC 페이지 진입 경로:
 
 ### iOS
 - [ ] 샌드박스 앱에서 `intoss://mallangmallang` 진입
-- [ ] `/poc-haptic` 10개 버튼 진동 차이 체감 후 매핑 노트 갱신
-- [ ] `/poc-reanimated` (Animated 버전) 원 터치 시 스프링 동작 확인
+- [ ] 상세 화면(`/mallang`)에서 햅틱 단계 변화 + 스프링 복원 체감
+- ~~`/poc-haptic`, `/poc-reanimated`~~ (#8에서 상세 화면으로 통합 후 페이지 삭제됨)
 - ~~`/poc-sound`~~ (페이지 삭제됨, 후속 이슈에서 대안 라이브러리로 재구현)
 
 ### Android
