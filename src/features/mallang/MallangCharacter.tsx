@@ -11,47 +11,57 @@ import type { MallangId } from './data';
 
 interface Design {
   bodyTop: string;
+  bodyHi: string;
   bodyBase: string;
+  bodyMid: string;
   bodyEdge: string;
-  outline: string;
   cheek: string;
   eye: string;
+  eyeHi: string;
 }
 
 const DESIGN: Record<MallangId, Design> = {
   default: {
     bodyTop: '#FFFFFF',
-    bodyBase: '#FFF8EC',
-    bodyEdge: '#F4DFC0',
-    outline: '#D8B98F',
-    cheek: '#FFAEBE',
-    eye: '#2A2018',
+    bodyHi: '#FFFCF6',
+    bodyBase: '#FFF1DD',
+    bodyMid: '#F4DAB4',
+    bodyEdge: '#E2BC90',
+    cheek: '#FFA8B8',
+    eye: '#231A12',
+    eyeHi: '#4A3826',
   },
   mochi: {
-    bodyTop: '#FFF8E8',
-    bodyBase: '#FFDFAF',
-    bodyEdge: '#E8B070',
-    outline: '#B88345',
-    cheek: '#FF9494',
-    eye: '#3D2817',
+    bodyTop: '#FFFAE8',
+    bodyHi: '#FFEAC8',
+    bodyBase: '#FFCE92',
+    bodyMid: '#E8AA68',
+    bodyEdge: '#B87C3E',
+    cheek: '#FF8585',
+    eye: '#2E1C0D',
+    eyeHi: '#5D3E27',
   },
   wakppu: {
-    bodyTop: '#F8FCFF',
-    bodyBase: '#C9E2FF',
-    bodyEdge: '#8FBDEB',
-    outline: '#6FA3D8',
-    cheek: '#FFA0B5',
-    eye: '#1F3056',
+    bodyTop: '#FAFDFF',
+    bodyHi: '#E5F1FF',
+    bodyBase: '#B5D5FF',
+    bodyMid: '#7DB1E6',
+    bodyEdge: '#4F86BE',
+    cheek: '#FF9FB5',
+    eye: '#16264A',
+    eyeHi: '#3A4A76',
   },
 };
 
 const LOCKED: Design = {
-  bodyTop: '#F8FAFC',
-  bodyBase: '#DCE2E8',
-  bodyEdge: '#B8C2CC',
-  outline: '#A0AAB4',
+  bodyTop: '#FAFCFD',
+  bodyHi: '#EEF2F5',
+  bodyBase: '#D8DEE4',
+  bodyMid: '#B8C0C8',
+  bodyEdge: '#92A0AC',
   cheek: '#B0B8C0',
-  eye: '#7A848E',
+  eye: '#6C7680',
+  eyeHi: '#8E98A2',
 };
 
 interface Props {
@@ -60,7 +70,6 @@ interface Props {
   locked?: boolean;
 }
 
-// 통통한 모찌형 — 위가 살짝 좁고 아래가 살짝 넓적
 const BODY_PATH = `
   M 0,-78
   C 44,-78 78,-50 78,-6
@@ -75,65 +84,85 @@ export function MallangCharacter({ id, size, locked = false }: Props) {
   const uid = `${id}${locked ? '-l' : ''}`;
   const idBody = `mb-${uid}`;
   const idHi = `mh-${uid}`;
+  const idRim = `mr-${uid}`;
   const idCheek = `mc-${uid}`;
+  const idEye = `me-${uid}`;
 
   return (
     <Svg width={size} height={size} viewBox="-100 -100 200 200">
       <Defs>
-        {/* 몸 — 위에서 빛이 들어오는 듯한 부드러운 그라디언트 */}
-        <RadialGradient id={idBody} cx="45%" cy="22%" r="88%">
+        {/* 몸 — 5단 그라디언트로 자연스러운 부피감 */}
+        <RadialGradient id={idBody} cx="42%" cy="18%" r="92%">
           <Stop offset="0%" stopColor={d.bodyTop} />
+          <Stop offset="25%" stopColor={d.bodyHi} />
           <Stop offset="55%" stopColor={d.bodyBase} />
+          <Stop offset="82%" stopColor={d.bodyMid} />
           <Stop offset="100%" stopColor={d.bodyEdge} />
         </RadialGradient>
-        {/* 메인 광택 */}
+
+        {/* 메인 광택 — 부드럽게 페이드 */}
         <RadialGradient id={idHi} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={locked ? '0.3' : '0.75'} />
+          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={locked ? '0.25' : '0.78'} />
+          <Stop offset="55%" stopColor="#FFFFFF" stopOpacity={locked ? '0.08' : '0.22'} />
           <Stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
         </RadialGradient>
-        {/* 볼 — 가장자리로 자연스럽게 페이드 */}
+
+        {/* 림라이트 — 우하단 가장자리 살짝 반사광 */}
+        <RadialGradient id={idRim} cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={locked ? '0.12' : '0.38'} />
+          <Stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </RadialGradient>
+
+        {/* 볼 — 중심 진하고 부드럽게 페이드 */}
         <RadialGradient id={idCheek} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor={d.cheek} stopOpacity={locked ? '0.4' : '0.8'} />
+          <Stop offset="0%" stopColor={d.cheek} stopOpacity={locked ? '0.4' : '0.88'} />
+          <Stop offset="55%" stopColor={d.cheek} stopOpacity={locked ? '0.18' : '0.42'} />
           <Stop offset="100%" stopColor={d.cheek} stopOpacity="0" />
+        </RadialGradient>
+
+        {/* 눈동자 — 위쪽 살짝 밝게 (구체감) */}
+        <RadialGradient id={idEye} cx="42%" cy="35%" r="65%">
+          <Stop offset="0%" stopColor={d.eyeHi} />
+          <Stop offset="100%" stopColor={d.eye} />
         </RadialGradient>
       </Defs>
 
-      {/* 몸 — 외곽선은 거의 안 보이게, 그라디언트로 입체감 */}
-      <Path
-        d={BODY_PATH}
-        fill={`url(#${idBody})`}
-        stroke={d.outline}
-        strokeOpacity={0.5}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
+      {/* 몸 — 외곽선 없음, 그라디언트만으로 형태 */}
+      <Path d={BODY_PATH} fill={`url(#${idBody})`} />
+
+      {/* 림라이트 — 우하단 (광원 반대편) */}
+      <Ellipse cx={40} cy={56} rx={38} ry={20} fill={`url(#${idRim})`} />
 
       {/* 메인 광택 — 좌상단 */}
-      <Ellipse cx={-28} cy={-42} rx={30} ry={20} fill={`url(#${idHi})`} />
+      <Ellipse cx={-24} cy={-40} rx={42} ry={28} fill={`url(#${idHi})`} />
 
-      {/* 윗머리 작은 반짝 */}
+      {/* 작은 핫스팟 — 가장 밝은 점 */}
       {!locked && (
-        <Circle cx={-8} cy={-60} r={3.2} fill="#FFFFFF" opacity={0.9} />
+        <Ellipse cx={-22} cy={-52} rx={9} ry={4.5} fill="#FFFFFF" opacity={0.92} />
       )}
 
       {/* 볼터치 */}
-      <Ellipse cx={-40} cy={24} rx={15} ry={11} fill={`url(#${idCheek})`} />
-      <Ellipse cx={40} cy={24} rx={15} ry={11} fill={`url(#${idCheek})`} />
+      <Ellipse cx={-40} cy={26} rx={17} ry={12} fill={`url(#${idCheek})`} />
+      <Ellipse cx={40} cy={26} rx={17} ry={12} fill={`url(#${idCheek})`} />
 
-      {/* 눈 — 살짝 세로로 통통한 동그란 눈 */}
-      <Ellipse cx={-20} cy={-2} rx={7} ry={8.5} fill={d.eye} />
-      <Ellipse cx={20} cy={-2} rx={7} ry={8.5} fill={d.eye} />
-      {/* 반짝 */}
+      {/* 눈 */}
+      <Ellipse cx={-20} cy={-2} rx={8} ry={9.5} fill={`url(#${idEye})`} />
+      <Ellipse cx={20} cy={-2} rx={8} ry={9.5} fill={`url(#${idEye})`} />
+
+      {/* 큰 반짝 */}
       {!locked && (
         <>
-          <Circle cx={-17.5} cy={-6} r={2.8} fill="#FFFFFF" />
-          <Circle cx={22.5} cy={-6} r={2.8} fill="#FFFFFF" />
+          <Ellipse cx={-17.5} cy={-6} rx={3.4} ry={4} fill="#FFFFFF" />
+          <Ellipse cx={22.5} cy={-6} rx={3.4} ry={4} fill="#FFFFFF" />
+          {/* 아래쪽 작은 반사광 */}
+          <Circle cx={-22} cy={2.5} r={1.3} fill="#FFFFFF" opacity={0.75} />
+          <Circle cx={18} cy={2.5} r={1.3} fill="#FFFFFF" opacity={0.75} />
         </>
       )}
 
       {/* 입 — 작고 부드러운 미소 */}
       <Path
-        d="M -7,17 Q 0,25 7,17"
+        d="M -8,17 Q 0,26 8,17"
         stroke={d.eye}
         strokeWidth={2.8}
         fill="none"
