@@ -8,15 +8,15 @@ interface Props {
   style?: ViewStyle;
 }
 
-const FOLLOW_RATIO = 0.6;
-const SCALE_X_DIVISOR = 400;
-const SCALE_Y_DIVISOR = 800;
-const SCALE_Y_FLOOR = 0.7;
+const FOLLOW_RATIO = 0.7;
+const SCALE_X_DIVISOR = 220; // 작을수록 적은 거리에 크게 늘어남
+const SCALE_Y_FLOOR = 0.45; // 너무 얇아지지 않게
 
+// 오버슈트 스프링 — release 후 1-2번 통통 튀는 느낌
 const SPRING_CONFIG = {
-  damping: 12,
-  stiffness: 180,
-  mass: 1.2,
+  damping: 8,
+  stiffness: 220,
+  mass: 1.0,
   useNativeDriver: false,
 } as const;
 
@@ -49,8 +49,11 @@ export function SquishyView({ size, children, style }: Props) {
     function updateDerived(x: number, y: number) {
       const distance = Math.sqrt(x * x + y * y);
       const dragDistance = distance / FOLLOW_RATIO;
-      scaleX.setValue(1 + dragDistance / SCALE_X_DIVISOR);
-      scaleY.setValue(Math.max(SCALE_Y_FLOOR, 1 - dragDistance / SCALE_Y_DIVISOR));
+      // 부피 보존 squish: 한쪽 늘어나면 다른 쪽 좁아짐 (scaleY ≈ 1/√scaleX)
+      const sx = 1 + dragDistance / SCALE_X_DIVISOR;
+      const sy = Math.max(SCALE_Y_FLOOR, 1 / Math.sqrt(sx));
+      scaleX.setValue(sx);
+      scaleY.setValue(sy);
       if (distance > 0.5) {
         rotate.setValue(Math.atan2(y, x));
       }
@@ -74,8 +77,14 @@ export function SquishyView({ size, children, style }: Props) {
         onPanResponderGrant: () => {
           panX.stopAnimation();
           panY.stopAnimation();
+          scaleX.stopAnimation();
+          scaleY.stopAnimation();
+          rotate.stopAnimation();
           panX.setValue(0);
           panY.setValue(0);
+          // 누르는 즉시 살짝 눌리는 squish 효과 — drag로 곧 덮어쓰임
+          scaleX.setValue(0.92);
+          scaleY.setValue(1.08);
           hapticRef.current.onGrant();
         },
         onPanResponderMove: (_, g) => {

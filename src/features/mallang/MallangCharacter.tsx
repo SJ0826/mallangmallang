@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Svg, {
   Circle,
   Defs,
@@ -81,6 +81,7 @@ const BODY_PATH = `
 
 export function MallangCharacter({ id, size, locked = false }: Props) {
   const d = locked ? LOCKED : DESIGN[id];
+  const blinking = useBlink(!locked);
   const uid = `${id}${locked ? '-l' : ''}`;
   const idBody = `mb-${uid}`;
   const idHi = `mh-${uid}`;
@@ -145,12 +146,12 @@ export function MallangCharacter({ id, size, locked = false }: Props) {
       <Ellipse cx={-40} cy={26} rx={17} ry={12} fill={`url(#${idCheek})`} />
       <Ellipse cx={40} cy={26} rx={17} ry={12} fill={`url(#${idCheek})`} />
 
-      {/* 눈 */}
-      <Ellipse cx={-20} cy={-2} rx={8} ry={9.5} fill={`url(#${idEye})`} />
-      <Ellipse cx={20} cy={-2} rx={8} ry={9.5} fill={`url(#${idEye})`} />
+      {/* 눈 — 깜빡이면 가늘게 */}
+      <Ellipse cx={-20} cy={-2} rx={8} ry={blinking ? 1.4 : 9.5} fill={`url(#${idEye})`} />
+      <Ellipse cx={20} cy={-2} rx={8} ry={blinking ? 1.4 : 9.5} fill={`url(#${idEye})`} />
 
-      {/* 큰 반짝 */}
-      {!locked && (
+      {/* 큰 반짝 — 깜빡일 때는 숨김 */}
+      {!locked && !blinking && (
         <>
           <Ellipse cx={-17.5} cy={-6} rx={3.4} ry={4} fill="#FFFFFF" />
           <Ellipse cx={22.5} cy={-6} rx={3.4} ry={4} fill="#FFFFFF" />
@@ -170,4 +171,35 @@ export function MallangCharacter({ id, size, locked = false }: Props) {
       />
     </Svg>
   );
+}
+
+// 3~6초 랜덤 간격으로 130ms 동안 눈을 감음
+function useBlink(enabled: boolean): boolean {
+  const [blinking, setBlinking] = useState(false);
+  useEffect(() => {
+    if (!enabled) return;
+    let mounted = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    function schedule() {
+      if (!mounted) return;
+      const delay = 3000 + Math.random() * 3000;
+      timer = setTimeout(() => {
+        if (!mounted) return;
+        setBlinking(true);
+        timer = setTimeout(() => {
+          if (!mounted) return;
+          setBlinking(false);
+          schedule();
+        }, 130);
+      }, delay);
+    }
+
+    schedule();
+    return () => {
+      mounted = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [enabled]);
+  return blinking;
 }
