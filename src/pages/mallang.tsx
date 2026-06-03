@@ -1,7 +1,8 @@
 import { createRoute } from '@granite-js/react-native';
 import { Txt } from '@toss/tds-react-native';
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { SquishyView } from '../features/mallang/SquishyView';
 import { MALLANGS } from '../features/mallang/data';
 import type { MallangId } from '../features/mallang/data';
 
@@ -31,19 +32,30 @@ function Page() {
 
   return (
     <View style={styles.container}>
-      <Image source={mallang.asset} style={styles.image} resizeMode="contain" />
-      <Txt typography="t7" fontWeight="bold">
-        {mallang.name}
-      </Txt>
-      <Txt typography="t3" color="#718096" textAlign="center">
-        상세 인터랙션은 다음 이슈에서 구현돼요
-      </Txt>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 12, left: 12, right: 12, bottom: 12 }}
+        >
+          <Txt typography="t4" fontWeight="bold" color="#4A5568">
+            ← 리스트로 돌아가기
+          </Txt>
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Txt typography="t4" fontWeight="bold" color="white">
-          ← 뒤로
+      <View style={styles.stage}>
+        <SquishyView source={mallang.asset} size={240} />
+      </View>
+
+      <View style={styles.caption}>
+        <Txt typography="t7" fontWeight="bold" textAlign="center">
+          {mallang.name}
         </Txt>
-      </TouchableOpacity>
+        <Txt typography="t3" color="#718096" textAlign="center">
+          잡고 늘려보세요
+        </Txt>
+      </View>
     </View>
   );
 }
@@ -51,22 +63,25 @@ function Page() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
     backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
   },
-  image: {
-    width: 240,
-    height: 240,
-    marginBottom: 16,
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   backButton: {
-    marginTop: 32,
-    backgroundColor: '#718096',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+  },
+  stage: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  caption: {
+    paddingBottom: 48,
+    gap: 6,
   },
 });
